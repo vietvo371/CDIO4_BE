@@ -13,12 +13,8 @@ class ThongKeController extends Controller
     public function getDataThongke1(Request $request) // Thống kê so tap theo loại phim
     {
         $id_chuc_nang = 12;
-        $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-        $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-        $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                            ->where('id_chuc_nang', $id_chuc_nang)
-                            ->first();
-        if(!$check) {
+        $check = $this->checkQuyen($id_chuc_nang);
+        if ($check == false) {
             return response()->json([
                 'status'  =>  false,
                 'message' =>  'Bạn không có quyền chức năng này'

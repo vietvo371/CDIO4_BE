@@ -13,8 +13,8 @@ return new class extends Migration
     {
         Schema::create('tap_phims', function (Blueprint $table) {
             $table->id();
-            $table->string('ten_tap_phim');
             $table->string('slug_tap_phim');
+            $table->integer('so_tap');
             $table->string('url');
             $table->integer('id_phim');
             $table->integer('tinh_trang');

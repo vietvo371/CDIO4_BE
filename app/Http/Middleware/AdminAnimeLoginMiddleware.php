@@ -16,13 +16,13 @@ class AdminAnimeLoginMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $check = Auth::guard('sanctum')->check();
-        if($check == false) {
-            return response()->json([
-                'status'  => 0,
-                'message' => 'Bạn chưa Đăng Nhập!',
-            ]);
+        $user = Auth::guard('sanctum')->user();
+        if ($user instanceof \App\Models\AdminAnime) {
+            return $next($request);
         }
-        return $next($request);
+        return response()->json([
+            'status'  => 0,
+            'message' => 'Bạn chưa Đăng Nhập!',
+        ]);
     }
 }

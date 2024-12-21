@@ -20,7 +20,7 @@ class AdminSeeder extends Seeder
                 'email'         =>"vietvo371@gmail.com",
                 'ho_va_ten'     =>"Văn Việt",
                 'password'      =>bcrypt(123456),
-                'hinh_anh'      =>"https://res.cloudinary.com/dltbjoii4/image/upload/v1705578787/image_anime/yqhdc90cpluahrye6sfr.jpg",
+                'hinh_anh'      =>"",
                 'id_chuc_vu'      =>"1",
 
             ],
@@ -28,7 +28,7 @@ class AdminSeeder extends Seeder
                 'email'         =>"dinhquy223@gmail.com",
                 'ho_va_ten'     =>"Đình Quý",
                 'password'      =>bcrypt(123456),
-                'hinh_anh'      =>"https://res.cloudinary.com/dltbjoii4/image/upload/v1705578814/image_anime/hl93ebbase1xuwldoeoj.jpg",
+                'hinh_anh'      =>"",
                 'id_chuc_vu'      =>"1",
             ],
 

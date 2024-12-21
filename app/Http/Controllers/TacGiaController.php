@@ -15,12 +15,8 @@ class TacGiaController extends Controller
     public function getData()
     {
         $id_chuc_nang = 9;
-        $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-        $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-        $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-            ->where('id_chuc_nang', $id_chuc_nang)
-            ->first();
-        if (!$check) {
+        $check = $this->checkQuyen($id_chuc_nang);
+        if ($check == false) {
             return response()->json([
                 'status'  =>  false,
                 'message' =>  'Bạn không có quyền chức năng này'
@@ -58,12 +54,8 @@ class TacGiaController extends Controller
     {
         try {
             $id_chuc_nang = 9;
-            $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-            $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-            $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                ->where('id_chuc_nang', $id_chuc_nang)
-                ->first();
-            if (!$check) {
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không có quyền chức năng này'
@@ -87,6 +79,14 @@ class TacGiaController extends Controller
     }
     public function timTacGia(Request $request)
     {
+        $id_chuc_nang = 9;
+        $check = $this->checkQuyen($id_chuc_nang);
+        if ($check == false) {
+            return response()->json([
+                'status'  =>  false,
+                'message' =>  'Bạn không có quyền chức năng này'
+            ]);
+        }
         $key    = '%' . $request->key . '%';
         $dataAdmin   = TacGia::select('tac_gias.*')
             ->where('ten_tac_gia', 'like', $key)
@@ -111,12 +111,8 @@ class TacGiaController extends Controller
     {
         try {
             $id_chuc_nang = 9;
-            $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-            $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-            $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                ->where('id_chuc_nang', $id_chuc_nang)
-                ->first();
-            if (!$check) {
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không có quyền chức năng này'
@@ -144,12 +140,8 @@ class TacGiaController extends Controller
     {
         try {
             $id_chuc_nang = 9;
-            $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-            $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-            $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                ->where('id_chuc_nang', $id_chuc_nang)
-                ->first();
-            if (!$check) {
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không có quyền chức năng này'
@@ -173,6 +165,14 @@ class TacGiaController extends Controller
     {
 
         try {
+            $id_chuc_nang = 9;
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
+                return response()->json([
+                    'status'  =>  false,
+                    'message' =>  'Bạn không có quyền chức năng này'
+                ]);
+            }
             $tinh_trang_moi = !$request->tinh_trang;
             //   $tinh_trang_moi là trái ngược của $request->tinh_trangs
             TacGia::where('id', $request->id)

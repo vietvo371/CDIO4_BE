@@ -13,7 +13,7 @@ class BinhLuanPhimController extends Controller
     {
         $data   = BinhLuanPhim::join('phims','id_phim','phims.id')
                                 ->join('khach_hangs','id_khach_hang','khach_hangs.id')
-                                ->select('binh_luan_phims.*','khach_hangs.ho_va_ten','khach_hangs.hinh_anh')
+                                ->select('binh_luan_phims.*','khach_hangs.ho_va_ten','khach_hangs.avatar')
                                 // ->take(3)
                                 ->get(); // get là ra 1 danh sách
                         return response()->json([

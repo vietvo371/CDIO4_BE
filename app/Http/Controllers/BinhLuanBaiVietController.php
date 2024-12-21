@@ -12,7 +12,7 @@ class BinhLuanBaiVietController extends Controller
     {
         $data   = BinhLuanBaiViet::join('bai_viets','id_bai_viet','bai_viets.id')
                                 ->join('khach_hangs','id_khach_hang','khach_hangs.id')
-                                ->select('binh_luan_bai_viets.*','khach_hangs.ho_va_ten','khach_hangs.hinh_anh')
+                                ->select('binh_luan_bai_viets.*','khach_hangs.ho_va_ten','khach_hangs.avatar')
                                 // ->take(3)
                                 ->get(); // get là ra 1 danh sách
                         return response()->json([

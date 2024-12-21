@@ -11,8 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('chuc_vus', function (Blueprint $table) {
-            $table->string('slug_chuc_vu');
+        Schema::create('chi_tiet_the_loais', function (Blueprint $table) {
+            $table->id();
+            $table->integer('id_phim');
+            $table->integer('id_the_loai');
+            $table->timestamps();
         });
     }
 
@@ -21,8 +24,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('chuc_vus', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('chi_tiet_the_loais');
     }
 };

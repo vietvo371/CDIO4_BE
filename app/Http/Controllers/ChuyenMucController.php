@@ -15,12 +15,8 @@ class ChuyenMucController extends Controller
     public function getData()
     {
         $id_chuc_nang = 11;
-        $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-        $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-        $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-            ->where('id_chuc_nang', $id_chuc_nang)
-            ->first();
-        if (!$check) {
+        $check = $this->checkQuyen($id_chuc_nang);
+        if ($check == false) {
             return response()->json([
                 'status'  =>  false,
                 'message' =>  'Bạn không có quyền chức năng này'
@@ -58,12 +54,8 @@ class ChuyenMucController extends Controller
     {
         try {
             $id_chuc_nang = 11;
-            $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-            $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-            $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                ->where('id_chuc_nang', $id_chuc_nang)
-                ->first();
-            if (!$check) {
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không có quyền chức năng này'
@@ -88,35 +80,39 @@ class ChuyenMucController extends Controller
 
     public function timChuyenMuc(Request $request)
     {
+        $id_chuc_nang = 11;
+        $check = $this->checkQuyen($id_chuc_nang);
+        if ($check == false) {
+            return response()->json([
+                'status'  =>  false,
+                'message' =>  'Bạn không có quyền chức năng này'
+            ]);
+        }
         $key    = '%' . $request->key . '%';
         $dataAdmin   = ChuyenMuc::select('chuyen_mucs.*')
             ->where('ten_chuyen_muc', 'like', $key)
             ->paginate(6); // get là ra 1  sách
-            $response = [
-                'pagination' => [
-                    'total' => $dataAdmin->total(),
-                    'per_page' => $dataAdmin->perPage(),
-                    'current_page' => $dataAdmin->currentPage(),
-                    'last_page' => $dataAdmin->lastPage(),
-                    'from' => $dataAdmin->firstItem(),
-                    'to' => $dataAdmin->lastItem()
-                ],
-                'dataAdmin' => $dataAdmin
-            ];
-            return response()->json([
-                'chuyen_muc_admin'  =>  $response,
-            ]);
+        $response = [
+            'pagination' => [
+                'total' => $dataAdmin->total(),
+                'per_page' => $dataAdmin->perPage(),
+                'current_page' => $dataAdmin->currentPage(),
+                'last_page' => $dataAdmin->lastPage(),
+                'from' => $dataAdmin->firstItem(),
+                'to' => $dataAdmin->lastItem()
+            ],
+            'dataAdmin' => $dataAdmin
+        ];
+        return response()->json([
+            'chuyen_muc_admin'  =>  $response,
+        ]);
     }
     public function xoaChuyenMuc($id)
     {
         try {
             $id_chuc_nang = 11;
-            $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-            $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-            $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                ->where('id_chuc_nang', $id_chuc_nang)
-                ->first();
-            if (!$check) {
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không có quyền chức năng này'
@@ -141,12 +137,8 @@ class ChuyenMucController extends Controller
     {
         try {
             $id_chuc_nang = 11;
-            $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-            $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-            $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                ->where('id_chuc_nang', $id_chuc_nang)
-                ->first();
-            if (!$check) {
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không có quyền chức năng này'
@@ -176,6 +168,14 @@ class ChuyenMucController extends Controller
     {
 
         try {
+            $id_chuc_nang = 11;
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
+                return response()->json([
+                    'status'  =>  false,
+                    'message' =>  'Bạn không có quyền chức năng này'
+                ]);
+            }
             $tinh_trang_moi = !$request->tinh_trang;
             //   $tinh_trang_moi là trái ngược của $request->tinh_trangs
             ChuyenMuc::where('id', $request->id)

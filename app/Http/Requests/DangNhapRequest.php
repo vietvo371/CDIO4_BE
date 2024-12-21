@@ -15,13 +15,16 @@ class DangNhapRequest extends FormRequest
     {
         return [
             'email'                =>  'required|exists:khach_hangs,email',
+            'password'                =>  'required|min:6|max:30',
         ];
     }
 
     public function messages()
     {
         return [
-            'email.*'                =>  'Email không tồn tại!',
+            'email.required' => 'Vui lòng nhập email',
+            'email.exists' => 'Tài khoản không tồn tại',
+            'password.*' => 'Vui lòng nhập mật khẩu'
         ];
     }
 }

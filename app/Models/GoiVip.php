@@ -10,9 +10,11 @@ class GoiVip extends Model
     use HasFactory;
     protected $table = 'goi_vips';
     protected $fillable = [
-            'ten_goi_vip',
-            'slug_goi_vip',
-            'gia_tien',
-            'tinh_trang',
+        'ten_goi',
+        'slug_goi_vip',
+        'thoi_han',
+        'tien_goc',
+        'tien_sale',
+        'tinh_trang',
     ];
 }

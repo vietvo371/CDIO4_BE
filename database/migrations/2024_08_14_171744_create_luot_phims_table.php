@@ -11,10 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('khach_hangs', function (Blueprint $table) {
-            $table->string('hash_quen_mat_khau')->nullable();
-            $table->string('hash_kich_hoat')->nullable();
-            $table->integer('is_done');
+        Schema::create('luot_xems', function (Blueprint $table) {
+            $table->id();
+            $table->integer('id_phim');
+            $table->integer('id_tap_phim');
+            $table->date('ngay_xem');
+            $table->integer('so_luot_xem');
+            $table->timestamps();
         });
     }
 
@@ -23,8 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('khach_hangs', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('luot_xems');
     }
 };

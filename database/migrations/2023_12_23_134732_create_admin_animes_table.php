@@ -13,11 +13,14 @@ return new class extends Migration
     {
         Schema::create('admin_animes', function (Blueprint $table) {
             $table->id();
-            $table->string('email')->uniqie();
+            $table->string('email');
             $table->string('ho_va_ten');
             $table->string('password');
-            $table->longText('hinh_anh');
+            $table->string('so_dien_thoai');
+            $table->string('hinh_anh')->nullable();
+            $table->integer('tinh_trang')->default(1);
             $table->integer('id_chuc_vu');
+            $table->integer('is_master')->default(0);
             $table->timestamps();
         });
     }

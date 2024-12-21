@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('ten_the_loai');
             $table->string('slug_the_loai');
+            $table->integer('id_danh_muc')->nullable();
             $table->integer('tinh_trang');
             $table->timestamps();
         });

@@ -17,10 +17,16 @@ return new class extends Migration
             $table->string('slug_phim');
             $table->longText('hinh_anh');
             $table->longText('mo_ta');
+            $table->integer('thoi_gian_chieu');
+            $table->integer('nam_san_xuat');
+            $table->string('quoc_gia');
+            $table->string('cong_ty_san_xuat');
             $table->integer('id_loai_phim');
-            $table->integer('id_the_loai');
-            $table->integer('id_tac_gia');
+            $table->string('the_loai_thanh_toan')->nullable();
+            $table->integer('id_the_loai')->default(0);
+            $table->string('dao_dien');
             $table->integer('so_tap_phim');
+            $table->integer('tong_luong_xem')->default(0);
             $table->integer('tinh_trang');
             $table->timestamps();
         });

@@ -15,23 +15,20 @@ class TapPhimController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function getData()
+    public function getData(Request $request)
     {
         $id_chuc_nang = 6;
-        $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-        $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-        $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-            ->where('id_chuc_nang', $id_chuc_nang)
-            ->first();
-        if (!$check) {
+        $check = $this->checkQuyen($id_chuc_nang);
+        if ($check == false) {
             return response()->json([
                 'status'  =>  false,
                 'message' =>  'Bạn không có quyền chức năng này'
             ]);
         }
-        $dataAdmin       = TapPhim::join('phims', 'id_phim', 'phims.id')
-            ->orderBy('slug_tap_phim', 'ASC')
-            ->select('tap_phims.*', 'phims.ten_phim')
+
+        $dataAdmin       = TapPhim::where('id_phim', $request->id_phim)
+            ->orderBy('so_tap', 'DESC')
+            ->select('tap_phims.*')
             ->paginate(6); // get là ra 1  sách
         $response = [
             'pagination' => [
@@ -60,29 +57,45 @@ class TapPhimController extends Controller
             'tap_phim'  =>  $data,
         ]);
     }
-
     public function taoTapPhim(Request $request)
     {
         try {
             $id_chuc_nang = 6;
-            $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-            $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-            $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                ->where('id_chuc_nang', $id_chuc_nang)
-                ->first();
-            if (!$check) {
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không có quyền chức năng này'
                 ]);
             }
-            TapPhim::create([
-                'ten_tap_phim'  => $request->ten_tap_phim,
-                'slug_tap_phim' => $request->slug_tap_phim,
-                'url'           => $request->url,
-                'id_phim'       => $request->id_phim,
-                'tinh_trang'    => $request->tinh_trang,
-            ]);
+            $tap_phim_exist = TapPhim::where('id_phim', $request->id)
+                ->where('so_tap', $request->so_tap)
+                ->first();
+            $phim = Phim::find($request->id);
+
+            if (!$tap_phim_exist) {
+                if ($request->so_tap <= $phim->so_tap_phim) {
+                    $data = $request->all();
+                    $data['slug_tap_phim'] = 'tap-' . $data['so_tap'] . '-' . uniqid();
+                    TapPhim::create([
+                        'slug_tap_phim'         => $data['slug_tap_phim'],
+                        'so_tap'                => $data['so_tap'],
+                        'url'                   => $data['url'],
+                        'id_phim'               => $data['id'],
+                        'tinh_trang'            => $data['tinh_trang'],
+                    ]);
+                } else {
+                    return response()->json([
+                        'status'   => false,
+                        'message'  => 'Tập phim khong vượt quá số lượng tập',
+                    ]);
+                }
+            } else {
+                return response()->json([
+                    'status'   => false,
+                    'message'  => 'Tập phim đã tồn tại',
+                ]);
+            }
             return response()->json([
                 'status'   => true,
                 'message'  => ' thêm Tập Phim thành công!',
@@ -90,12 +103,20 @@ class TapPhimController extends Controller
         } catch (ExceptionEvent $e) {
             return response()->json([
                 'status'     => false,
-                'message'    => 'Xoá Tập Phim không thành công!!'
+                'message'    => 'Xảy ra lỗi!!'
             ]);
         }
     }
     public function timTapPhim(Request $request)
     {
+        $id_chuc_nang = 6;
+        $check = $this->checkQuyen($id_chuc_nang);
+        if ($check == false) {
+            return response()->json([
+                'status'  =>  false,
+                'message' =>  'Bạn không có quyền chức năng này'
+            ]);
+        }
         $key    = '%' . $request->key . '%';
         $dataAdmin   = TapPhim::join('phims', 'id_phim', 'phims.id')
             ->orderBy('slug_tap_phim', 'ASC')
@@ -121,35 +142,28 @@ class TapPhimController extends Controller
     {
         try {
             $id_chuc_nang = 6;
-            $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-            $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-            $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                ->where('id_chuc_nang', $id_chuc_nang)
-                ->first();
-            if (!$check) {
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không có quyền chức năng này'
                 ]);
             }
-            TapPhim::where('id', $request->id)
-                ->update([
-                    'ten_tap_phim'  => $request->ten_tap_phim,
-                    'slug_tap_phim' => $request->slug_tap_phim,
-                    'url'           => $request->url,
-                    'id_phim'       => $request->id_phim,
-                    'tinh_trang'    => $request->tinh_trang,
-                ]);
+            $data = $request->all();
+            TapPhim::where('id', $request->id)->update([
+                'url'                   => $data['url'],
+                'tinh_trang'            => $data['tinh_trang'],
+            ]);
 
             return response()->json([
                 'status'     => true,
-                'message'    => 'Đã Cập Nhật thành ' . $request->ten_the_loai,
+                'message'    => 'Cập Nhật thành công',
             ]);
         } catch (Exception $e) {
             //throw $th;
             return response()->json([
                 'status'     => false,
-                'message'    => 'Cập Nhật Thể Loại không thành công!!'
+                'message'    => 'Xảy ra lỗi!!'
             ]);
         }
     }
@@ -157,12 +171,8 @@ class TapPhimController extends Controller
     {
         try {
             $id_chuc_nang = 6;
-            $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-            $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-            $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                ->where('id_chuc_nang', $id_chuc_nang)
-                ->first();
-            if (!$check) {
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không có quyền chức năng này'
@@ -172,13 +182,39 @@ class TapPhimController extends Controller
 
             return response()->json([
                 'status'     => true,
-                'message'    => 'Đã xoá Thể Loại thành công!!'
+                'message'    => 'Xoá Tập phim thành công!!'
             ]);
         } catch (ExceptionEvent $e) {
             //throw $th;
             return response()->json([
                 'status'     => false,
-                'message'    => 'Xoá Thể Loại không thành công!!'
+                'message'    => 'Xoá Tập phim không thành công!!'
+            ]);
+        }
+    }
+    public function xoaAllTapPhim($id)
+    {
+        try {
+            $id_chuc_nang = 6;
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
+                return response()->json([
+                    'status'  =>  false,
+                    'message' =>  'Bạn không có quyền chức năng này'
+                ]);
+            }
+
+            $tap_phim = TapPhim::where('id_phim', $id)->delete();
+
+            return response()->json([
+                'status'     => true,
+                'message'    => 'Xoá Tất cả tập phim thành công!!'
+            ]);
+        } catch (ExceptionEvent $e) {
+            //throw $th;
+            return response()->json([
+                'status'     => false,
+                'message'    => 'Xoá Tập phim không thành công!!'
             ]);
         }
     }
@@ -186,6 +222,14 @@ class TapPhimController extends Controller
     {
 
         try {
+            $id_chuc_nang = 6;
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
+                return response()->json([
+                    'status'  =>  false,
+                    'message' =>  'Bạn không có quyền chức năng này'
+                ]);
+            }
             $tinh_trang_moi = !$request->tinh_trang;
             //   $tinh_trang_moi là trái ngược của $request->tinh_trangs
             TapPhim::where('id', $request->id)

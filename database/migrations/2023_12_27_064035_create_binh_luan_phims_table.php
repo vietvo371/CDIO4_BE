@@ -16,6 +16,7 @@ return new class extends Migration
             $table->longText('noi_dung');
             $table->integer('id_phim');
             $table->integer('id_khach_hang');
+            $table->integer('id_tap_phim');
             $table->timestamps();
         });
     }

@@ -13,14 +13,17 @@ class KhachHang extends Authenticatable
     use HasApiTokens, HasFactory, Notifiable;
     protected $table = 'khach_hangs';
     protected $fillable = [
-            'email',
-           'ho_va_ten',
-           'password',
-           'hinh_anh',
-           'hash_quen_mat_khau',
-           'hash_kich_hoat',
-           'is_done',
-           'ngay_sinh',
+        'ho_va_ten',
+        'avatar',
+        'email',
+        'password',
+        'so_dien_thoai',
+        'is_block',
+        'is_active',
+        'google_id',
+        'hash_reset',
+        'hash_active',
+        'id_goi_vip',
     ];
 
 }

@@ -10,10 +10,10 @@ class TapPhim extends Model
     use HasFactory;
     protected $table = 'tap_phims';
     protected $fillable = [
-       'ten_tap_phim',
-       'slug_tap_phim',
-       'url',
-      'id_phim',
-      'tinh_trang',
+                'slug_tap_phim',
+                'so_tap',
+                'url',
+                'id_phim',
+                'tinh_trang',
     ];
 }

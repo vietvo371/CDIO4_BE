@@ -13,5 +13,6 @@ class LoaiPhim extends Model
             'ten_loai_phim',
             'slug_loai_phim',
             'tinh_trang',
+            'id_danh_muc'
     ];
 }

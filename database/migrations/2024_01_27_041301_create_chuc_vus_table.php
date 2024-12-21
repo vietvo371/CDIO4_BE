@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('chuc_vus', function (Blueprint $table) {
             $table->id();
             $table->string('ten_chuc_vu');
+            $table->string('slug_chuc_vu');
             $table->integer('tinh_trang');
             $table->timestamps();
         });

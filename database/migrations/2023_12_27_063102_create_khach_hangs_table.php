@@ -13,10 +13,17 @@ return new class extends Migration
     {
         Schema::create('khach_hangs', function (Blueprint $table) {
             $table->id();
-            $table->string('email')->uniqie();
             $table->string('ho_va_ten');
+            $table->string('avatar')->nullable();
+            $table->string('email');
             $table->string('password');
-            $table->longText('hinh_anh');
+            $table->string('so_dien_thoai')->nullable();
+            $table->integer('is_block')->default(1);
+            $table->integer('is_active')->default(0);
+            $table->string('google_id')->nullable();
+            $table->string ('hash_reset')->nullable();
+            $table->string ('hash_active')->nullable();
+            $table->integer('id_goi_vip')->nullable();
             $table->timestamps();
         });
     }

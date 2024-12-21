@@ -13,10 +13,12 @@ return new class extends Migration
     {
         Schema::create('goi_vips', function (Blueprint $table) {
             $table->id();
-            $table->string('ten_goi_vip');
+            $table->string('ten_goi');
             $table->string('slug_goi_vip');
-            $table->integer('gia_tien');
-            $table->integer('tinh_trang');
+            $table->integer('thoi_han')->comment('tinh_theo_thang');
+            $table->double('tien_goc');
+            $table->double('tien_sale');
+            $table->integer('tinh_trang')->default(1);
             $table->timestamps();
         });
     }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DanhMucWeb;
 use App\Models\LoaiPhim;
 use App\Models\PhanQuyen;
 use App\Models\Phim;
@@ -18,19 +19,18 @@ class LoaiPhimController extends Controller
     public function getData()
     {
         $id_chuc_nang = 8;
-        $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-        $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-        $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-            ->where('id_chuc_nang', $id_chuc_nang)
-            ->first();
-        if (!$check) {
+        $check = $this->checkQuyen($id_chuc_nang);
+        if ($check == false) {
             return response()->json([
                 'status'  =>  false,
                 'message' =>  'Bạn không có quyền chức năng này'
             ]);
         }
-        $dataAdmin   = LoaiPhim::select('loai_phims.*')
-            ->paginate(6); // get là ra 1  sách
+        $dataDanhMuc       = DanhMucWeb::where('danh_muc_webs.tinh_trang', 1)
+            ->select('danh_muc_webs.*')
+            ->get(); // get là ra 1  sách
+        $dataAdmin   = LoaiPhim::join('danh_muc_webs', 'loai_phims.id_danh_muc', 'danh_muc_webs.id')->select('loai_phims.*','danh_muc_webs.ten_danh_muc')
+            ->paginate(9); // get là ra 1  sách
         $response = [
             'pagination' => [
                 'total' => $dataAdmin->total(),
@@ -44,6 +44,7 @@ class LoaiPhimController extends Controller
         ];
         return response()->json([
             'loai_phim_admin'  =>  $response,
+            'list_danh_muc'  =>  $dataDanhMuc,
         ]);
     }
     public function getDataHome()
@@ -55,66 +56,90 @@ class LoaiPhimController extends Controller
             'loai_phim'  =>  $data,
         ]);
     }
-    public function getDataHomeLPhim(Request $request)
+    public function getDataHomeLPhim($slug)
     {
         $loai_phim               = LoaiPhim::where('loai_phims.tinh_trang', 1)
-            ->where('loai_phims.slug_loai_phim', $request->slug_lp)
+            ->where('loai_phims.slug_loai_phim', $slug)
             ->select('loai_phims.*')
             ->first();
 
         $phim                   = Phim::join('the_loais', 'id_the_loai', 'the_loais.id')
             ->join('loai_phims', 'id_loai_phim', 'loai_phims.id')
-            ->join('tac_gias', 'id_tac_gia', 'tac_gias.id')
             ->where('phims.tinh_trang', 1)
-            ->where('loai_phims.slug_loai_phim', $request->slug_lp)
-            ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim', 'tac_gias.ten_tac_gia')
-            ->get();
+            ->where('the_loais.tinh_trang', 1)
+            ->where('loai_phims.tinh_trang', 1)
+            ->where('loai_phims.slug_loai_phim', $slug)
+            ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim',)
+            ->paginate(9); // get là ra 1  sách
 
+        $response = [
+            'pagination' => [
+                'total' => $phim->total(),
+                'per_page' => $phim->perPage(),
+                'current_page' => $phim->currentPage(),
+                'last_page' => $phim->lastPage(),
+                'from' => $phim->firstItem(),
+                'to' => $phim->lastItem()
+            ],
+            'dataPhim' => $phim
+        ];
         $phim_9_obj              = Phim::join('the_loais', 'id_the_loai', 'the_loais.id')
             ->join('loai_phims', 'id_loai_phim', 'loai_phims.id')
-            ->join('tac_gias', 'id_tac_gia', 'tac_gias.id')
             ->where('phims.tinh_trang', 1)
-            ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim', 'tac_gias.ten_tac_gia')
+            ->where('the_loais.tinh_trang', 1)
+            ->where('loai_phims.tinh_trang', 1)
+            ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim')
             ->inRandomOrder() // Lấy ngẫu nhiên
             ->take(9)
             ->get(); // get là ra 1 danh sách
         return response()->json([
             'loai_phim'    =>  $loai_phim,
-            'phim'        =>  $phim,
+            'phim'        =>  $response,
             'phim_9_obj'  =>  $phim_9_obj,
         ]);
     }
-    public function sapxepHome(Request $request)
+    public function sapxepHome($id_lp, $catagory)
     {
-        $catagory = $request->catagory;
-        $id_lp    = $request->id_lp;
         if ($catagory === 'az') {
             $data = Phim::join('the_loais', 'id_the_loai', 'the_loais.id')
                 ->join('loai_phims', 'id_loai_phim', 'loai_phims.id')
-                ->join('tac_gias', 'id_tac_gia', 'tac_gias.id')
-                ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim', 'tac_gias.ten_tac_gia')
+                ->where('id_loai_phim', $id_lp)
+                ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim')
                 ->orderBy('ten_phim', 'ASC')  // tăng dần
-                ->get();
+                ->paginate(9); // get là ra 1  sách
+
         } else if ($catagory === 'za') {
             $data = Phim::join('the_loais', 'id_the_loai', 'the_loais.id')
                 ->join('loai_phims', 'id_loai_phim', 'loai_phims.id')
-                ->join('tac_gias', 'id_tac_gia', 'tac_gias.id')
-                ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim', 'tac_gias.ten_tac_gia')
+                ->where('id_loai_phim', $id_lp)
+                ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim')
                 ->orderBy('ten_phim', 'DESC')  // giảm dần
-                ->get();
+                ->paginate(9); // get là ra 1  sách
+
         } else if ($catagory === '1to10') {
             $data = Phim::join('the_loais', 'id_the_loai', 'the_loais.id')
                 ->join('loai_phims', 'id_loai_phim', 'loai_phims.id')
-                ->join('tac_gias', 'id_tac_gia', 'tac_gias.id')
                 ->where('id_loai_phim', $id_lp)
-                ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim', 'tac_gias.ten_tac_gia')
+                ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim')
                 ->orderBy('id', 'DESC')  // giảm dần
                 ->skip(0)
                 ->take(9)
-                ->get();
+                ->paginate(9); // get là ra 1  sách
         }
+
+        $response = [
+            'pagination' => [
+                'total' => $data->total(),
+                'per_page' => $data->perPage(),
+                'current_page' => $data->currentPage(),
+                'last_page' => $data->lastPage(),
+                'from' => $data->firstItem(),
+                'to' => $data->lastItem()
+            ],
+            'dataPhim' => $data
+        ];
         return response()->json([
-            'phim'  =>  $data,
+            'phim'  =>  $response,
         ]);
     }
 
@@ -122,12 +147,8 @@ class LoaiPhimController extends Controller
     {
         try {
             $id_chuc_nang = 8;
-            $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-            $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-            $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                ->where('id_chuc_nang', $id_chuc_nang)
-                ->first();
-            if (!$check) {
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không có quyền chức năng này'
@@ -137,6 +158,7 @@ class LoaiPhimController extends Controller
                 'ten_loai_phim'          => $request->ten_loai_phim,
                 'slug_loai_phim'         => $request->slug_loai_phim,
                 'tinh_trang'             => $request->tinh_trang,
+                'id_danh_muc'            => $request->id_danh_muc,
             ]);
             return response()->json([
                 'status'   => true,
@@ -151,10 +173,18 @@ class LoaiPhimController extends Controller
     }
     public function timLoaiPhim(Request $request)
     {
+        $id_chuc_nang = 8;
+        $check = $this->checkQuyen($id_chuc_nang);
+        if ($check == false) {
+            return response()->json([
+                'status'  =>  false,
+                'message' =>  'Bạn không có quyền chức năng này'
+            ]);
+        }
         $key    = '%' . $request->key . '%';
         $dataAdmin   = LoaiPhim::select('loai_phims.*')
             ->where('ten_loai_phim', 'like', $key)
-            ->paginate(6); // get là ra 1  sách
+            ->paginate(9); // get là ra 1  sách
         $response = [
             'pagination' => [
                 'total' => $dataAdmin->total(),
@@ -174,12 +204,8 @@ class LoaiPhimController extends Controller
     {
         try {
             $id_chuc_nang = 8;
-            $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-            $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-            $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                ->where('id_chuc_nang', $id_chuc_nang)
-                ->first();
-            if (!$check) {
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không có quyền chức năng này'
@@ -190,6 +216,7 @@ class LoaiPhimController extends Controller
                     'ten_loai_phim'          => $request->ten_loai_phim,
                     'slug_loai_phim'         => $request->slug_loai_phim,
                     'tinh_trang'             => $request->tinh_trang,
+                    'id_danh_muc'            => $request->id_danh_muc,
                 ]);
             return response()->json([
                 'status'     => true,
@@ -207,12 +234,8 @@ class LoaiPhimController extends Controller
     {
         try {
             $id_chuc_nang = 8;
-            $user   = Auth::guard('sanctum')->user(); // Chính là người đang login
-            $user_chuc_vu   = $user->id_chuc_vu;    // Giả sử
-            $check  = PhanQuyen::where('id_chuc_vu', $user_chuc_vu)
-                ->where('id_chuc_nang', $id_chuc_nang)
-                ->first();
-            if (!$check) {
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không có quyền chức năng này'
@@ -236,6 +259,14 @@ class LoaiPhimController extends Controller
     {
 
         try {
+            $id_chuc_nang = 8;
+            $check = $this->checkQuyen($id_chuc_nang);
+            if ($check == false) {
+                return response()->json([
+                    'status'  =>  false,
+                    'message' =>  'Bạn không có quyền chức năng này'
+                ]);
+            }
             $tinh_trang_moi = !$request->tinh_trang;
             //   $tinh_trang_moi là trái ngược của $request->tinh_trangs
             LoaiPhim::where('id', $request->id)
@@ -257,9 +288,9 @@ class LoaiPhimController extends Controller
     }
     public function kiemTraSlugLoaiPhim(Request $request)
     {
-        $tac_gia = LoaiPhim::where('slug_loai_phim', $request->slug)->first();
+        $loai_phim = LoaiPhim::where('slug_loai_phim', $request->slug)->first();
 
-        if (!$tac_gia) {
+        if (!$loai_phim) {
             return response()->json([
                 'status'            =>   true,
                 'message'           =>   'Tên Loại Phim phù hợp!',
