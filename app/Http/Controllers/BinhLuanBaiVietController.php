@@ -20,7 +20,6 @@ class BinhLuanBaiVietController extends Controller
                         ]);
     }
 
-
     public function taoBinhLuanBlog(Request $request)
     {
         try {

@@ -44,6 +44,7 @@ class BinhLuanPhimController extends Controller
     }
 
 
+
     public function xoaBinhLuanPhim($id)
     {
         try {

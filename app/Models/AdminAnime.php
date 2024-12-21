@@ -17,6 +17,7 @@ class AdminAnime extends Authenticatable
            'ho_va_ten',
            'password',
            'hinh_anh',
+           'id_chuc_vu',
 
     ];
 

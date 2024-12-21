@@ -20,6 +20,7 @@ class KhachHang extends Authenticatable
            'hash_quen_mat_khau',
            'hash_kich_hoat',
            'is_done',
+           'ngay_sinh',
     ];
 
 }
