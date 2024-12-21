@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('ten_danh_muc');
             $table->string('slug_danh_muc');
+            $table->string('link');
             $table->integer('id_danh_muc_cha')->nullable();
             $table->integer('tinh_trang')->default(1);
             $table->timestamps();

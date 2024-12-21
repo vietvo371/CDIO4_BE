@@ -13,6 +13,7 @@ class DanhMucWeb extends Model
     protected $fillable = [
         'ten_danh_muc',
         'slug_danh_muc',
+        'link',
         'tinh_trang',
         'id_danh_muc_cha'
     ];

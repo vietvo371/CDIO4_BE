@@ -22,7 +22,7 @@ class KhachHangMiddleWare
         }
         return response()->json([
             'status'  => 0,
-            'message' => 'Bạn chưa Đăng Nhập!',
+            'message' => 'Chức năng này yêu cầu đăng nhập!',
         ]);
     }
 }

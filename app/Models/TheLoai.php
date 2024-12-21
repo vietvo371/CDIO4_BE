@@ -13,6 +13,5 @@ class TheLoai extends Model
              'ten_the_loai',
              'slug_the_loai',
              'tinh_trang',
-             'id_danh_muc',
     ];
 }

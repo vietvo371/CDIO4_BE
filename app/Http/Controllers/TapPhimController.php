@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapNhatTapPhimRequest;
+use App\Http\Requests\TaoTapPhimRequest;
+use App\Http\Requests\ThayDoiTrangThaiTapPhimRequest;
 use App\Models\PhanQuyen;
 use App\Models\Phim;
 use App\Models\TapPhim;
@@ -57,7 +60,7 @@ class TapPhimController extends Controller
             'tap_phim'  =>  $data,
         ]);
     }
-    public function taoTapPhim(Request $request)
+    public function taoTapPhim(TaoTapPhimRequest $request)
     {
         try {
             $id_chuc_nang = 6;
@@ -82,7 +85,6 @@ class TapPhimController extends Controller
                         'so_tap'                => $data['so_tap'],
                         'url'                   => $data['url'],
                         'id_phim'               => $data['id'],
-                        'tinh_trang'            => $data['tinh_trang'],
                     ]);
                 } else {
                     return response()->json([
@@ -138,7 +140,7 @@ class TapPhimController extends Controller
             'tap_phim_admin'  =>  $response,
         ]);
     }
-    public function capnhatTapPhim(Request $request)
+    public function capnhatTapPhim(CapNhatTapPhimRequest $request)
     {
         try {
             $id_chuc_nang = 6;
@@ -218,7 +220,7 @@ class TapPhimController extends Controller
             ]);
         }
     }
-    public function thaydoiTrangThaiTapPhim(Request $request)
+    public function thaydoiTrangThaiTapPhim(ThayDoiTrangThaiTapPhimRequest $request)
     {
 
         try {

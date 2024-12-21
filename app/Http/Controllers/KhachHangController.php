@@ -7,10 +7,13 @@ use App\Http\Requests\DangNhapRequest;
 use App\Http\Requests\DoiPassRequest;
 use App\Http\Requests\DoiThongTinRequest;
 use App\Http\Requests\QuenMatKhauRequest;
+use App\Http\Requests\TaoKhachHangRequest;
+use App\Http\Requests\UpdateKhachHangRequest;
 use App\Jobs\MailQuenMatKhau as JobsMailQuenMatKhau;
 use App\Jobs\MailQueue;
 use App\Mail\KichHoatTaiKhoan;
 use App\Mail\mailQuenMatKhau;
+use App\Models\HoaDon;
 use App\Models\KhachHang;
 use App\Models\PhanQuyen;
 use Exception;
@@ -61,7 +64,7 @@ class KhachHangController extends Controller
             'obj_user'  => $user,
         ]);
     }
-    public function taoKhachHang(Request $request)
+    public function taoKhachHang(TaoKhachHangRequest $request)
     {
         try {
             $id_chuc_nang = 2;
@@ -73,7 +76,7 @@ class KhachHangController extends Controller
                 ]);
             }
             // Handle file upload
-            $filePath = null;
+            $filePath = 'https://lh3.googleusercontent.com/a/ACg8ocLquh3rkU8ZbqJlyVij28Ss12yYGqYhzP4MJ29ulErlW-_9lg=s96-c';
             if ($request->hasFile('avatar')) {
                 $file = $request->file('avatar');
                 $fileName = time() . '_' . $file->getClientOriginalName();
@@ -101,7 +104,6 @@ class KhachHangController extends Controller
 
             KhachHang::where('id', $request->id)
                 ->update([
-                    'email'         => $request->email,
                     'ho_va_ten'     => $request->ho_va_ten,
                     'avatar'        => $request->avatar,
                     'so_dien_thoai' => $request->so_dien_thoai,
@@ -126,7 +128,6 @@ class KhachHangController extends Controller
 
             KhachHang::where('id', $request->id)
                 ->update([
-                    'email'         => $request->email,
                     'ho_va_ten'     => $request->ho_va_ten,
                     'avatar'        => $request->avatar,
                     'so_dien_thoai' => $request->so_dien_thoai,
@@ -410,7 +411,7 @@ class KhachHangController extends Controller
         }
     }
 
-    public function capnhatKhachHang(Request $request)
+    public function capnhatKhachHang(UpdateKhachHangRequest $request)
     {
         try {
             $id_chuc_nang = 2;
@@ -446,9 +447,8 @@ class KhachHangController extends Controller
             }
             KhachHang::where('id', $request->id)
                 ->update([
-                    'ho_va_ten'         => $request->ho_va_ten,
-                    'avatar'            => $request->avatar,
-                    'email'             => $request->email,
+                    'ho_va_ten'          => $request->ho_va_ten,
+                    'so_dien_thoai'      => $request->so_dien_thoai,
                     'avatar'             => $filePath,
                 ]);
 
@@ -505,9 +505,11 @@ class KhachHangController extends Controller
 
     public function register(DangKyRequest $request)
     {
+        $filePath = 'https://lh3.googleusercontent.com/a/ACg8ocLquh3rkU8ZbqJlyVij28Ss12yYGqYhzP4MJ29ulErlW-_9lg=s96-c';
         KhachHang::create([
             'ho_va_ten'   => $request->ho_va_ten,
             'email'       => $request->email,
+            'avatar'       => $filePath,
             'password'    => bcrypt($request->password),
         ]);
         return response()->json([
@@ -517,7 +519,7 @@ class KhachHangController extends Controller
     }
     public function kiemTraQuenMK(Request $request)
     {
-        $check  = KhachHang::where('hash_quen_mat_khau', $request->hash_quen_mat_khau)->first();
+        $check  = KhachHang::where('hash_reset', $request->hash_quen_mat_khau)->first();
         if ($check) {
             return response()->json([
                 'status'            =>   true,
@@ -664,5 +666,37 @@ class KhachHangController extends Controller
                 'message'    => 'Xoá Nha token không thành công!!'
             ]);
         }
+    }
+
+    public function checkUserTerm()
+    {
+        $userId = Auth::guard('sanctum')->user()->id;
+
+        // Kiểm tra nếu người dùng chưa đăng nhập
+        // if (!$userId) {
+        //     return response()->json([
+        //         'status'  => 0,
+        //         'message' => 'Chức năng này yêu cầu đăng nhập!',
+        //     ]);
+        // }
+        // Tìm gói dịch vụ hợp lệ cho người dùng hiện tại
+        $goihientai = HoaDon::where('id_khach_hang', $userId)
+            ->where('tinh_trang', 1)
+            ->where('ngay_bat_dau', '<=', now())
+            ->where('ngay_ket_thuc', '>=', now())
+            ->latest()
+            ->first();
+
+        // Kiểm tra nếu người dùng không có gói hợp lệ
+        if (!$goihientai) {
+            return response()->json([
+                'status'  => 2,
+                'message' => 'Bạn chưa đăng ký gói hoặc gói của bạn đã hết hạn vui lòng mua thêm để tiếp tục!',
+            ]);
+        }
+        return response()->json([
+            'status'  => 1,
+            'message' => 'Hợp lệ!',
+        ]);
     }
 }

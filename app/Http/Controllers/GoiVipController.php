@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapNhatGoiVipRequest;
+use App\Http\Requests\TaoGoiVipRequest;
+use App\Http\Requests\thaydoiTrangThaiGoiVip;
 use App\Models\GoiVip;
 use App\Models\PhanQuyen;
 use Exception;
@@ -11,6 +14,16 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 class GoiVipController extends Controller
 {
+    public function goiVipOpen()
+    {
+        $dataOpen   = GoiVip::select('goi_vips.*')
+            ->where('tinh_trang', 1)
+            ->get();
+        return response()->json([
+            'data'  =>  $dataOpen,
+        ]);
+    }
+    
     public function getData()
     {
         $id_chuc_nang = 13;
@@ -38,7 +51,7 @@ class GoiVipController extends Controller
             'goi_vips'  =>  $response,
         ]);
     }
-    public function taoGoiVip(Request $request)
+    public function taoGoiVip(TaoGoiVipRequest $request)
     {
         try {
             $id_chuc_nang = 13;
@@ -94,7 +107,7 @@ class GoiVipController extends Controller
         }
     }
 
-    public function capnhatGoiVip(Request $request)
+    public function capnhatGoiVip(CapNhatGoiVipRequest $request)
     {
         try {
             $id_chuc_nang = 13;
@@ -107,12 +120,12 @@ class GoiVipController extends Controller
             }
             GoiVip::where('id', $request->id)
                 ->update([
-                'ten_goi'       => $request->ten_goi,
-                'slug_goi_vip'  => $request->slug_goi_vip,
-                'thoi_han'      => $request->thoi_han,
-                'tien_goc'      => $request->tien_goc,
-                'tien_sale'     => $request->tien_sale,
-                'tinh_trang'    => $request->tinh_trang,
+                    'ten_goi'       => $request->ten_goi,
+                    'slug_goi_vip'  => $request->slug_goi_vip,
+                    'thoi_han'      => $request->thoi_han,
+                    'tien_goc'      => $request->tien_goc,
+                    'tien_sale'     => $request->tien_sale,
+                    'tinh_trang'    => $request->tinh_trang,
                 ]);
 
             return response()->json([
@@ -128,7 +141,7 @@ class GoiVipController extends Controller
         }
     }
 
-    public function thaydoiTrangThaiGoiVip(Request $request)
+    public function thaydoiTrangThaiGoiVip(thaydoiTrangThaiGoiVip $request)
     {
 
         try {
@@ -161,9 +174,9 @@ class GoiVipController extends Controller
     }
     public function kiemTraSlugGoiVip(Request $request)
     {
-        $tac_gia = GoiVip::where('slug_goi_vip', $request->slug)->first();
+        $goi_vip = GoiVip::where('slug_goi_vip', $request->slug)->first();
 
-        if (!$tac_gia) {
+        if (!$goi_vip) {
             return response()->json([
                 'status'            =>   true,
                 'message'           =>   'Tên Gói Vip phù hợp!',

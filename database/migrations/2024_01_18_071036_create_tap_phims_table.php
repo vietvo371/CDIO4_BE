@@ -17,7 +17,7 @@ return new class extends Migration
             $table->integer('so_tap');
             $table->string('url');
             $table->integer('id_phim');
-            $table->integer('tinh_trang');
+            $table->integer('tinh_trang')->default(1);
             $table->timestamps();
         });
     }

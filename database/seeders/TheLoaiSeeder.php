@@ -5,7 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
-
+use Illuminate\Support\Str;
 class TheLoaiSeeder extends Seeder
 {
     /**
@@ -13,15 +13,42 @@ class TheLoaiSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('the_loais')->delete();
         DB::table('the_loais')->truncate();
-        DB::table('the_loais')->insert([
-            ['ten_the_loai' => 'Hành Động', 'slug_the_loai' => 'hanh-dong', 'tinh_trang' => '1'],
-            ['ten_the_loai' => 'Viễn Tưởng', 'slug_the_loai' => 'vien-tuong', 'tinh_trang' => '1'],
-            ['ten_the_loai' => 'Chuyển Sinh', 'slug_the_loai' => 'chuyen-sinh', 'tinh_trang' => '1'],
-            ['ten_the_loai' => 'Pháp Thuật', 'slug_the_loai' => 'phap-thuat', 'tinh_trang' => '1'],
-            ['ten_the_loai' => 'Siêu Nhiên', 'slug_the_loai' => 'sieu-nhien', 'tinh_trang' => '1'],
-            ['ten_the_loai' => 'Phiêu Lưu', 'slug_the_loai' => 'phieu-luu', 'tinh_trang' => '1'],
-        ]);
+        $the_loais = [
+            'Viễn Tưởng',
+            'Khoa Học',
+            'Chính Kịch',
+            'Bí Ẩn',
+            'Hành Động',
+            'Hài Hước',
+            'Phiêu Lưu',
+            'Kinh Dị',
+            'Tình Cảm',
+            'Chiến Tranh',
+            'Gia Đình',
+            'Tâm Lý',
+            'Thể Thao',
+            'Võ Thuật',
+            'Cổ Trang',
+            'Hình Sự',
+            'Tài Liệu',
+            'Âm Nhạc',
+            'Thần Thoại',
+            'Học Đường',
+            'Kinh Điển',
+            'Phim 18+'
+        ];
+
+        $theLoaisData = [];
+
+        foreach ($the_loais as $the_loai) {
+            $theLoaisData[] = [
+                'ten_the_loai' => $the_loai,
+                'slug_the_loai' => Str::slug($the_loai, '-'),
+                'tinh_trang' => 1,  // Active status
+            ];
+        }
+
+        DB::table('the_loais')->insert($theLoaisData);
     }
 }

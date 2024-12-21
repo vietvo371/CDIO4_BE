@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapNhatTheLoaiRequest;
+use App\Http\Requests\TaoTheLoaiRequest;
 use App\Models\DanhMucWeb;
 use App\Models\PhanQuyen;
 use App\Models\Phim;
@@ -9,6 +11,7 @@ use App\Models\TheLoai;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 
 class TheLoaiController extends Controller
@@ -26,13 +29,9 @@ class TheLoaiController extends Controller
                 'message' =>  'Bạn không có quyền chức năng này'
             ]);
         }
-        $dataAdmin       = TheLoai::join('danh_muc_webs', 'the_loais.id_danh_muc', 'danh_muc_webs.id')
-            ->select('the_loais.*', 'danh_muc_webs.ten_danh_muc')
+        $dataAdmin       = TheLoai::select('the_loais.*')
             ->paginate(6); // get là ra 1  sách
 
-        $dataDanhMuc       = DanhMucWeb::where('danh_muc_webs.tinh_trang', 1)
-            ->select('danh_muc_webs.*')
-            ->get(); // get là ra 1  sách
 
         $response = [
             'pagination' => [
@@ -47,24 +46,61 @@ class TheLoaiController extends Controller
         ];
         return response()->json([
             'the_loai'  =>  $response,
-            'list_danh_muc'  =>  $dataDanhMuc,
         ]);
     }
     public function getDataHomeTLPhim(Request $request)
     {
+        $checkSlug = TheLoai::where('slug_the_loai', $request->slug)->exists();
+        if (!$checkSlug) {
+            return response()->json([
+                'status'  =>  false,
+                'message' =>  'Slug không tồn tại'
+            ]);
+        }
         $the_loai               = TheLoai::where('the_loais.tinh_trang', 1)
             ->where('the_loais.slug_the_loai', $request->slug)
             ->select('the_loais.*')
             ->first();
-
-        $phim                   = Phim::join('the_loais', 'id_the_loai', 'the_loais.id')
-            ->join('loai_phims', 'id_loai_phim', 'loai_phims.id')
-            ->where('phims.tinh_trang', 1)
-            ->where('the_loais.tinh_trang', 1)
-            ->where('loai_phims.tinh_trang', 1)
-            ->where('the_loais.slug_the_loai', $request->slug)
-            ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim')
-            ->paginate(9); // get là ra 1  sách
+        $phim = DB::table(DB::raw('
+                                    (
+                                        SELECT
+                                            phims.id,
+                                            phims.ten_phim,
+                                            phims.hinh_anh,
+                                            phims.slug_phim,
+                                            phims.mo_ta,
+                                            phims.tong_luot_xem,
+                                            phims.so_tap_phim,
+                                            loai_phims.ten_loai_phim,
+                                            GROUP_CONCAT(DISTINCT the_loais.ten_the_loai SEPARATOR ", ") as ten_the_loais,
+                                            (
+                                                SELECT COUNT(tap_phims.id)
+                                                FROM tap_phims
+                                                WHERE tap_phims.id_phim = phims.id
+                                            ) as tong_tap
+                                        FROM
+                                            phims
+                                        JOIN
+                                            chi_tiet_the_loais ON chi_tiet_the_loais.id_phim = phims.id
+                                        JOIN
+                                            loai_phims ON loai_phims.id = phims.id_loai_phim
+                                        JOIN
+                                            the_loais ON chi_tiet_the_loais.id_the_loai = the_loais.id
+                                        WHERE
+                                            phims.tinh_trang = 1
+                                        AND
+                                            loai_phims.tinh_trang = 1
+                                        AND
+                                            the_loais.tinh_trang = 1
+                                        AND
+                                            the_loais.slug_the_loai =  :slug_the_loai
+                                        GROUP BY
+                                            phims.id, phims.ten_phim, phims.hinh_anh, phims.slug_phim, phims.mo_ta, phims.tong_luot_xem, phims.so_tap_phim,loai_phims.ten_loai_phim
+                                        HAVING
+                                            tong_tap > 0
+                                    ) as subquery
+                                '))
+            ->setBindings(['slug_the_loai' => $request->slug])->paginate(9);
 
         $response = [
             'pagination' => [
@@ -78,15 +114,43 @@ class TheLoaiController extends Controller
             'dataPhim' => $phim
         ];
 
-        $phim_9_obj              = Phim::join('the_loais', 'id_the_loai', 'the_loais.id')
-            ->join('loai_phims', 'id_loai_phim', 'loai_phims.id')
-            ->where('phims.tinh_trang', 1)
-            ->where('the_loais.tinh_trang', 1)
-            ->where('loai_phims.tinh_trang', 1)
-            ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim')
-            ->inRandomOrder() // Lấy ngẫu nhiên
-            ->take(9)
-            ->get(); // get là ra 1 danh sách
+        $phim_9_obj = DB::table(DB::raw('
+        (
+            SELECT
+                phims.id,
+                phims.ten_phim,
+                phims.hinh_anh,
+                phims.slug_phim,
+                phims.mo_ta,
+                phims.tong_luot_xem,
+                phims.so_tap_phim,
+                GROUP_CONCAT(DISTINCT the_loais.ten_the_loai SEPARATOR ", ") as ten_the_loais,
+                (
+                    SELECT COUNT(tap_phims.id)
+                    FROM tap_phims
+                    WHERE tap_phims.id_phim = phims.id
+                ) as tong_tap
+            FROM
+                phims
+            JOIN
+                chi_tiet_the_loais ON chi_tiet_the_loais.id_phim = phims.id
+            JOIN
+                loai_phims ON loai_phims.id = phims.id_loai_phim
+            JOIN
+                the_loais ON chi_tiet_the_loais.id_the_loai = the_loais.id
+            WHERE
+                phims.tinh_trang = 1
+            AND
+                loai_phims.tinh_trang = 1
+            AND
+                the_loais.tinh_trang = 1
+            GROUP BY
+                phims.id, phims.ten_phim, phims.hinh_anh, phims.slug_phim, phims.mo_ta, phims.tong_luot_xem, phims.so_tap_phim
+            HAVING
+                tong_tap > 0
+        ) as subquery
+        '))
+            ->take(7)->get();
 
         return response()->json([
             'the_loai'    =>  $the_loai,
@@ -94,25 +158,49 @@ class TheLoaiController extends Controller
             'phim_9_obj'  =>  $phim_9_obj,
         ]);
     }
-    public function sapxepHome($id_tl, $catagory)
+    public function sapxepHome($slug_the_loai, $catagory)
     {
-        if ($catagory === 'az') {
-            $data = Phim::join('the_loais', 'id_the_loai', 'the_loais.id')
-                ->join('loai_phims', 'id_loai_phim', 'loai_phims.id')
-                ->where('id_the_loai', $id_tl)
-                ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim')
-                ->orderBy('ten_phim', 'ASC')  // tăng dần
-                ->paginate(9); // get là ra 1  sách
-
-        } else if ($catagory === 'za') {
-            $data = Phim::join('the_loais', 'id_the_loai', 'the_loais.id')
-                ->join('loai_phims', 'id_loai_phim', 'loai_phims.id')
-                ->where('id_the_loai', $id_tl)
-                ->select('phims.*', 'the_loais.ten_the_loai', 'loai_phims.ten_loai_phim')
-                ->orderBy('ten_phim', 'DESC')  // giảm dần
-                ->paginate(9); // get là ra 1  sách
-
-        }
+        $data = DB::table(DB::raw('
+        (
+            SELECT
+                phims.id,
+                phims.ten_phim,
+                loai_phims.ten_loai_phim,
+                phims.hinh_anh,
+                phims.slug_phim,
+                phims.tong_luot_xem,
+                phims.mo_ta,
+                phims.so_tap_phim,
+                GROUP_CONCAT(DISTINCT the_loais.ten_the_loai SEPARATOR ", ") as ten_the_loais,
+                (
+                    SELECT COUNT(tap_phims.id)
+                    FROM tap_phims
+                    WHERE tap_phims.id_phim = phims.id
+                ) as tong_tap
+            FROM
+                phims
+            JOIN
+                chi_tiet_the_loais ON chi_tiet_the_loais.id_phim = phims.id
+            JOIN
+                loai_phims ON loai_phims.id = phims.id_loai_phim
+            JOIN
+                the_loais ON chi_tiet_the_loais.id_the_loai = the_loais.id
+            WHERE
+                phims.tinh_trang = 1
+            AND
+                loai_phims.tinh_trang = 1
+            AND
+                the_loais.tinh_trang = 1
+            AND
+                the_loais.slug_the_loai = :slug_the_loai
+            GROUP BY
+                phims.id, phims.ten_phim, loai_phims.ten_loai_phim, phims.hinh_anh, phims.slug_phim, phims.tong_luot_xem, phims.mo_ta, phims.so_tap_phim
+            HAVING
+                tong_tap > 0
+        ) as subquery
+    '))->setBindings(['slug_the_loai' => $slug_the_loai])
+            ->orderBy('ten_phim', $catagory) // Sắp xếp theo tổng lượt xem giảm dần
+            ->paginate(9);
         $response = [
             'pagination' => [
                 'total' => $data->total(),
@@ -155,7 +243,7 @@ class TheLoaiController extends Controller
 
 
 
-    public function taoTheLoai(Request $request)
+    public function taoTheLoai(TaoTheLoaiRequest $request)
     {
         try {
             $id_chuc_nang = 7;
@@ -195,13 +283,10 @@ class TheLoaiController extends Controller
             ]);
         }
         $key    = '%' . $request->key . '%';
-        $dataAdmin       = TheLoai::join('danh_muc_webs', 'the_loais.id_danh_muc', 'danh_muc_webs.id')
-            ->select('the_loais.*', 'danh_muc_webs.ten_danh_muc')
+        $dataAdmin       = TheLoai::select('the_loais.*')
             ->where('ten_the_loai', 'like', $key)
             ->paginate(6); // get là ra 1  sách
-        $dataDanhMuc       = DanhMucWeb::where('danh_muc_webs.tinh_trang', 1)
-            ->select('danh_muc_webs.*')
-            ->get(); // get là ra 1  sách
+
         $response = [
             'pagination' => [
                 'total' => $dataAdmin->total(),
@@ -215,10 +300,9 @@ class TheLoaiController extends Controller
         ];
         return response()->json([
             'the_loai'  =>  $response,
-            'list_danh_muc'  =>  $dataDanhMuc,
         ]);
     }
-    public function capnhatTheLoai(Request $request)
+    public function capnhatTheLoai(CapNhatTheLoaiRequest $request)
     {
         try {
             $id_chuc_nang = 7;

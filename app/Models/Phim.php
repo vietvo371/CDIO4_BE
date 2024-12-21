@@ -22,9 +22,12 @@ class Phim extends Model
         'id_the_loai',
         'dao_dien',
         'so_tap_phim',
-        'tong_luong_xem',
+        'tong_luot_xem',
         'tinh_trang',
-        'cong_ty_san_xuat'
+        'ngon_ngu',
+        'poster_img',
+        'trailer_url',
+        'is_slide',
+        'chat_luong'
     ];
-
 }

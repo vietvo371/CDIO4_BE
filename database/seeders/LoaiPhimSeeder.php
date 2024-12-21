@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 
 class LoaiPhimSeeder extends Seeder
 {
@@ -13,14 +14,23 @@ class LoaiPhimSeeder extends Seeder
      */
     public function run(): void
     {
-        DB::table('loai_phims')->delete();
         DB::table('loai_phims')->truncate();
-        DB::table('loai_phims')->insert([
-            ['ten_loai_phim' => 'Phim Lẻ', 'slug_loai_phim' => 'phim-le', 'tinh_trang' => '1'],
-            ['ten_loai_phim' => 'Phim Chiếu Rap', 'slug_loai_phim' => 'phim-chieu-rap', 'tinh_trang' => '1'],
-            ['ten_loai_phim' => 'Phim Bộ', 'slug_loai_phim' => 'phim-bo', 'tinh_trang' => '1'],
-        ]);
 
+        $loai_phims = [
+            'Phim Lẻ',
+            'Phim Bộ',
+            'Phim Hoạt Hình'
+        ];
+        $loaiPhimsData = [];
 
+        foreach ($loai_phims as $loai_phim) {
+            $loaiPhimsData[] = [
+                'ten_loai_phim' => $loai_phim,
+                'slug_loai_phim' => Str::slug($loai_phim, '-'),
+                'tinh_trang' => 1,  // Active status
+            ];
+        }
+
+        DB::table('loai_phims')->insert($loaiPhimsData);
     }
 }

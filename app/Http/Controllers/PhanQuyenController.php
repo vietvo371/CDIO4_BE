@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreatePhanQuyenRequest;
 use App\Models\Action;
 use App\Models\ChucVu;
 use App\Models\PhanQuyen;
@@ -29,7 +30,7 @@ class PhanQuyenController extends Controller
             'listChucNang'  =>  $listChucNang,
         ]);
     }
-    public function createPhanQuyen(Request $request)
+    public function createPhanQuyen(CreatePhanQuyenRequest $request)
     {
         $id_chuc_nang = 4;
         $check = $this->checkQuyen($id_chuc_nang);
@@ -39,24 +40,28 @@ class PhanQuyenController extends Controller
                 'message' =>  'Bạn không có quyền chức năng này'
             ]);
         }
-        $check = PhanQuyen::where('id_chuc_nang', $request->id_chuc_nang)
-            ->where('id_chuc_vu', $request->id_chuc_vu)->first();
-        if ($check) {
-            return response()->json([
-                'status'    =>  false,
-                'message'   =>  'Chức vụ đã có chức năng này!'
-            ]);
-        } else {
-            PhanQuyen::create([
-                'id_chuc_nang'  =>  $request->id_chuc_nang,
-                'id_chuc_vu'    =>  $request->id_chuc_vu
-            ]);
 
+        // Check if the `PhanQuyen` already exists
+        if (PhanQuyen::where('id_chuc_nang', $request->id_chuc_nang)
+            ->where('id_chuc_vu', $request->id_chuc_vu)
+            ->exists()
+        ) {
             return response()->json([
-                'status'    =>  true,
-                'message'   =>  'Đã phân quyền thành công'
+                'status'  => false,
+                'message' => 'Chức vụ đã có chức năng này!',
             ]);
         }
+
+        // Create the new `PhanQuyen`
+        PhanQuyen::create([
+            'id_chuc_nang' => $request->id_chuc_nang,
+            'id_chuc_vu'   => $request->id_chuc_vu,
+        ]);
+
+        return response()->json([
+            'status'  => true,
+            'message' => 'Đã phân quyền thành công',
+        ]);
     }
 
     public function getChucNang(Request $request)

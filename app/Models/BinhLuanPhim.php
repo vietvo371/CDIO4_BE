@@ -13,6 +13,6 @@ class BinhLuanPhim extends Model
         'noi_dung',
         'id_phim',
         'id_khach_hang',
-        'id_tap_phim',
+        'so_sao',
     ];
 }

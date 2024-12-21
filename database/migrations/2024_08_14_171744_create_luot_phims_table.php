@@ -17,6 +17,7 @@ return new class extends Migration
             $table->integer('id_tap_phim');
             $table->date('ngay_xem');
             $table->integer('so_luot_xem');
+            $table->integer('id_khach_hang');
             $table->timestamps();
         });
     }

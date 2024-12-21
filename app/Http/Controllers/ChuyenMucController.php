@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapNhatChuyenMucRequest;
+use App\Http\Requests\TaoChuyenMucRequest;
+use App\Http\Requests\ThayDoiTrangThaiChuyenMucRequest;
 use App\Models\ChuyenMuc;
 use App\Models\PhanQuyen;
 use Exception;
@@ -50,7 +53,7 @@ class ChuyenMucController extends Controller
     }
 
 
-    public function taoChuyenMuc(Request $request)
+    public function taoChuyenMuc(TaoChuyenMucRequest  $request)
     {
         try {
             $id_chuc_nang = 11;
@@ -133,7 +136,7 @@ class ChuyenMucController extends Controller
         }
     }
 
-    public function capnhatChuyenMuc(Request $request)
+    public function capnhatChuyenMuc(CapNhatChuyenMucRequest $request)
     {
         try {
             $id_chuc_nang = 11;
@@ -164,7 +167,7 @@ class ChuyenMucController extends Controller
         }
     }
 
-    public function thaydoiTrangThaiChuyenMuc(Request $request)
+    public function thaydoiTrangThaiChuyenMuc(ThayDoiTrangThaiChuyenMucRequest $request)
     {
 
         try {

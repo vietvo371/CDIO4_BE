@@ -14,5 +14,6 @@ class LuotPhim extends Model
         'id_tap_phim',
         'ngay_xem',
         'so_luot_xem',
+        'id_khach_hang',
     ];
 }

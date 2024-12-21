@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapnhatChucVuRequest;
+use App\Http\Requests\TaoChucVuRequest;
+use App\Http\Requests\ThaydoiTrangThaiChucVuRequest;
 use App\Models\ChucVu;
 use App\Models\PhanQuyen;
 use Exception;
@@ -39,7 +42,7 @@ class ChucVuController extends Controller
         ]);
     }
 
-    public function taoChucVu(Request $request)
+    public function taoChucVu(TaoChucVuRequest $request)
     {
         try {
             $id_chuc_nang = 3;
@@ -95,7 +98,7 @@ class ChucVuController extends Controller
             'chuc_vu_admin'  =>  $response,
         ]);
     }
-    public function capnhatChucVu(Request $request)
+    public function capnhatChucVu(CapnhatChucVuRequest $request)
     {
         try {
             $id_chuc_nang = 3;
@@ -150,7 +153,7 @@ class ChucVuController extends Controller
             ]);
         }
     }
-    public function thaydoiTrangThaiChucVu(Request $request)
+    public function thaydoiTrangThaiChucVu(ThaydoiTrangThaiChucVuRequest $request)
     {
         try {
             $id_chuc_nang = 3;

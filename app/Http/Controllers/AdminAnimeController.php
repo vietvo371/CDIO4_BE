@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CreateAdminRequest;
 use App\Http\Requests\DoiPassAdminReuqest;
 use App\Http\Requests\DoiPassRequest;
 use App\Http\Requests\LoginAdminRequest;
+use App\Http\Requests\ToggleAdminStatusRequest;
+use App\Http\Requests\UpdateAdminRequest;
 use App\Models\AdminAnime;
 use App\Models\ChucVu;
 use App\Models\PhanQuyen;
@@ -71,8 +74,11 @@ class AdminAnimeController extends Controller
                 'message' =>  'Bạn không có quyền chức năng này'
             ]);
         }
+        $dangLogin = $this->isAdmin();
+
         $admin = AdminAnime::find($request->id);
-        if ($admin->is_master == 1) {
+
+        if ($admin->is_master == 1 && $admin->id != $dangLogin->id) {
             return response()->json([
                 'status'  =>  false,
                 'message' =>  'Bạn không thể cập nhật Tài Khoản Có Quyền Hạn Cao'
@@ -174,7 +180,7 @@ class AdminAnimeController extends Controller
             ]);
         }
     }
-    public function taoAdmin(Request $request)
+    public function taoAdmin(CreateAdminRequest  $request)
     {
         try {
             $id_chuc_nang = 1;
@@ -186,7 +192,7 @@ class AdminAnimeController extends Controller
                 ]);
             }
             // Handle file upload
-            $filePath = null;
+            $filePath = 'https://lh3.googleusercontent.com/a/ACg8ocLquh3rkU8ZbqJlyVij28Ss12yYGqYhzP4MJ29ulErlW-_9lg=s96-c';
             if ($request->hasFile('hinh_anh')) {
                 $file = $request->file('hinh_anh');
                 $fileName = time() . '_' . $file->getClientOriginalName();
@@ -275,7 +281,7 @@ class AdminAnimeController extends Controller
         }
     }
 
-    public function capnhatAdmin(Request $request)
+    public function capnhatAdmin(UpdateAdminRequest $request)
     {
         try {
             $id_chuc_nang = 1;
@@ -286,16 +292,18 @@ class AdminAnimeController extends Controller
                     'message' =>  'Bạn không có quyền chức năng này'
                 ]);
             }
+            $dangLogin = $this->isAdmin();
+
             $admin = AdminAnime::find($request->id);
 
-            if ($admin->is_master == 1) {
+            if ($admin->is_master == 1 && $admin->id != $dangLogin->id) {
                 return response()->json([
                     'status'  =>  false,
                     'message' =>  'Bạn không thể cập nhật Tài Khoản Có Quyền Hạn Cao'
                 ]);
             }
 
-            $filePath = $admin->hinh_anh; // Giữ nguyên đường dẫn ảnh cũ nếu không có file mới được gửi
+            // Xác định nếu hinh_anh là file upload hoặc URL
             if ($request->hasFile('hinh_anh')) {
                 $file = $request->file('hinh_anh');
                 $fileName = time() . '_' . $file->getClientOriginalName();
@@ -303,13 +311,15 @@ class AdminAnimeController extends Controller
                 $filePath = asset('uploads/avatars/admins/' . $fileName);
 
                 // Xóa ảnh cũ nếu có
-                if ($admin->hinh_anh && file_exists(public_path('Admin/' . basename($admin->hinh_anh)))) {
-                    unlink(public_path('Admin/' . basename($admin->hinh_anh)));
+                if ($admin->hinh_anh && file_exists(public_path('uploads/avatars/admins/' . basename($admin->hinh_anh)))) {
+                    unlink(public_path('uploads/avatars/admins/' . basename($admin->hinh_anh)));
                 }
+            } else {
+                $filePath = $request->hinh_anh; // Nếu không phải file, dùng URL hiện có
             }
+
             AdminAnime::where('id', $request->id)
                 ->update([
-                    'email'                 => $request->email,
                     'ho_va_ten'             => $request->ho_va_ten,
                     'hinh_anh'              => $filePath,
                     'id_chuc_vu'            => $request->id_chuc_vu,
@@ -321,8 +331,7 @@ class AdminAnimeController extends Controller
                 'status'     => true,
                 'message'    => 'Cập Nhật thành công ',
             ]);
-        } catch (ExceptionEvent $e) {
-            //throw $th;
+        } catch (Exception $e) {
             return response()->json([
                 'status'     => false,
                 'message'    => 'Cập Nhật Admin không thành công!!'
@@ -330,7 +339,8 @@ class AdminAnimeController extends Controller
         }
     }
 
-    public function thaydoiTrangThaiAdmin(Request $request)
+
+    public function thaydoiTrangThaiAdmin(ToggleAdminStatusRequest $request)
     {
 
         try {
@@ -416,6 +426,26 @@ class AdminAnimeController extends Controller
             'message'   => 'Bạn chưa đăng nhập tài khoản admin!',
             'status'    => false
         ]);
+    }
+    public function logoutAll()
+    {
+        $user = Auth::guard('sanctum')->user();
+        if ($user) {
+            $tokens = $user->tokens;
+            foreach ($tokens as $key => $value) {
+                $value->delete();
+            }
+
+            return response()->json([
+                'message'   =>  'Đã đăng xuất tất cả thành công!',
+                'status'    =>  true,
+            ]);
+        } else {
+            return response()->json([
+                'message'   =>  'Bạn cần đăng nhập hệ thống',
+                'status'    =>  false,
+            ]);
+        }
     }
     public function register(Request $request)
     {

@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\CapNhatBaiVietRequest;
+use App\Http\Requests\TaoBaiVietRequest;
+use App\Http\Requests\ThayDoiTrangThaiBaiVietRequest;
 use App\Models\BaiViet;
 use App\Models\ChuyenMuc;
 use App\Models\PhanQuyen;
@@ -110,7 +113,9 @@ class BaiVietController extends Controller
     }
 
 
-    public function taoBaiViet(Request $request)
+
+
+    public function taoBaiViet(TaoBaiVietRequest $request)
     {
         try {
             $id_chuc_nang = 10;
@@ -132,7 +137,7 @@ class BaiVietController extends Controller
             }
             BaiViet::create([
                 'tieu_de'               => $request->tieu_de,
-                'slug_tieu_de'           => $request->slug_tieu_de,
+                'slug_tieu_de'          => $request->slug_tieu_de,
                 'hinh_anh'              => $filePath,
                 'mo_ta'                 => $request->mo_ta,
                 'mo_ta_chi_tiet'        => $request->mo_ta_chi_tiet,
@@ -210,7 +215,7 @@ class BaiVietController extends Controller
         }
     }
 
-    public function capnhatBaiViet(Request $request)
+    public function capnhatBaiViet(CapNhatBaiVietRequest $request)
     {
         try {
             $id_chuc_nang = 10;
@@ -266,7 +271,7 @@ class BaiVietController extends Controller
         }
     }
 
-    public function thaydoiTrangThaiBaiViet(Request $request)
+    public function thaydoiTrangThaiBaiViet(ThayDoiTrangThaiBaiVietRequest $request)
     {
 
         try {
